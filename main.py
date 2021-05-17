@@ -1,7 +1,7 @@
 from stmlearn.equivalencecheckers import SmartWmethodEquivalenceChecker, Sequential
 from stmlearn.equivalencecheckers.experimental import GeneticEquivalenceChecker
 from stmlearn.learners import TTTMealyLearner
-from stmlearn.util import MATExperiment, bfs
+from stmlearn.util import MATExperiment, bfs, Logger
 from stmlearn.suls import MealyDotSUL
 from stmlearn.teachers import Teacher
 
@@ -54,9 +54,8 @@ def run_experiment(benchmark_path):
         # Set up the counterexample tracking for the genetic eq checker
         experiment.enable_ct_tracking()
         experiment.run()
+        Logger().write()
 
 
-with Pool(3) as p:
-    p.map(run_experiment, list(sorted(Path("benchmarks/BenchmarkASMLRERS2019").glob("*.dot"), key=os.path.getsize))[0:3])
-
-# run_experiment(Path("benchmarks/BenchmarkASMLRERS2019/m54.dot"))
+with Pool(8) as p:
+    p.map(run_experiment, list(sorted(Path("benchmarks/BenchmarkASMLRERS2019").glob("*.dot"), key=os.path.getsize)))
