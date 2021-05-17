@@ -2,10 +2,15 @@ from stmlearn.util import parse_log
 import pandas as pd
 import matplotlib.pyplot as plt
 
-path = "/home/tom/projects/STMLearn-benchmarks/logs/m55/2021-04-29_14:11:21/log.txt"
-df = pd.DataFrame.from_dict(data=parse_log(path)) \
-    .astype({'Log.MEMBERSHIP': int, 'Log.EQUIVALENCE': int, 'Log.TEST': int})
+path_1 = "/home/tom/projects/STMLearn-benchmarks/logs/genetic/m54/2021-05-17_19:28:25/log.txt"
+df_1 = pd.DataFrame.from_dict(data=parse_log(path_1)) \
+    .astype({'Log.MEMBERSHIP': int, 'Log.EQUIVALENCE': int, 'Log.TEST': int, 'Log.STATE_COUNT': int})
 
-plt.plot(df['timestamp'], df['Log.MEMBERSHIP'], color='blue')
-plt.plot(df['timestamp'], df['Log.TEST'], color='red')
+path_2 = "/home/tom/projects/STMLearn-benchmarks/logs/normal/m54/2021-05-17_19:28:07/log.txt"
+df_2 = pd.DataFrame.from_dict(data=parse_log(path_2)) \
+    .astype({'Log.MEMBERSHIP': int, 'Log.EQUIVALENCE': int, 'Log.TEST': int, 'Log.STATE_COUNT': int})
+
+plt.plot(df_1['timestamp'], df_1['Log.STATE_COUNT'], color='blue', label='genetic')
+plt.plot(df_2['timestamp'], df_2['Log.STATE_COUNT'], color='red', label='wmethod')
+plt.legend()
 plt.show()

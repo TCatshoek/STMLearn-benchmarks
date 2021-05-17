@@ -1,45 +1,62 @@
 from stmlearn.equivalencecheckers import SmartWmethodEquivalenceChecker, Sequential
 from stmlearn.equivalencecheckers.experimental import GeneticEquivalenceChecker
 from stmlearn.learners import TTTMealyLearner
-from stmlearn.util import MATExperiment
+from stmlearn.util import MATExperiment, bfs
 from stmlearn.suls import MealyDotSUL
 from stmlearn.teachers import Teacher
 
+from multiprocessing import Pool
+from pathlib import Path
+import os
 
 
-benchmark_setups = {
-    'normal': lambda sul: MATExperiment(
-        learner=TTTMealyLearner,
-        teacher=Teacher(
-            sul=sul,
-            eqc=SmartWmethodEquivalenceChecker(
-                horizon=5,
-                stop_on='error'
-            )
-        )
-    ),
-    'genetic': lambda sul: MATExperiment(
-        learner=TTTMealyLearner,
-        teacher=Teacher(
-            sul=sul,
-            eqc=Sequential(
-                GeneticEquivalenceChecker,
-                SmartWmethodEquivalenceChecker(
+
+def run_experiment(benchmark_path):
+    benchmark_setups = {
+        'normal': lambda sul: MATExperiment(
+            learner=TTTMealyLearner,
+            teacher=Teacher(
+                sul=sul,
+                eqc=SmartWmethodEquivalenceChecker(
                     horizon=5,
                     stop_on='error'
                 )
             )
+        ),
+        'genetic': lambda sul: MATExperiment(
+            learner=TTTMealyLearner,
+            teacher=Teacher(
+                sul=sul,
+                eqc=Sequential(
+                    GeneticEquivalenceChecker,
+                    SmartWmethodEquivalenceChecker(
+                        horizon=5,
+                        stop_on='error'
+                    )
+                )
+            )
         )
-    )
-}
+    }
 
-problem = 'm55'
+    path = benchmark_path
+    problem = path.stem
+    print("loading:", path)
+    sul = MealyDotSUL(path)
+    n_states = len(sul._get_node_names())
+    print(n_states, "states")
 
-for type in benchmark_setups.keys():
-    sul = MealyDotSUL(f'benchmarks/BenchmarkASMLRERS2019/{problem}.dot')
-    experiment = benchmark_setups[type](sul)
-    experiment.enable_logging(f'logs/{type}', problem, log_interval=10)
-    hyp = experiment.run()
+    for type in benchmark_setups.keys():
+        experiment = benchmark_setups[type](sul)
+        experiment.enable_logging(f'logs/{type}', problem,
+                                  log_interval=10,
+                                  write_on_change={'STATE_COUNT'})
 
-    print("Hyp states:", len(hyp.get_states()))
-    print("Real states:", len(sul.edge_map))
+        # Set up the counterexample tracking for the genetic eq checker
+        experiment.enable_ct_tracking()
+        experiment.run()
+
+
+with Pool(3) as p:
+    p.map(run_experiment, list(sorted(Path("benchmarks/BenchmarkASMLRERS2019").glob("*.dot"), key=os.path.getsize))[0:3])
+
+# run_experiment(Path("benchmarks/BenchmarkASMLRERS2019/m54.dot"))
