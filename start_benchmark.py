@@ -53,6 +53,8 @@ for benchmark_path in benchmarks:
         )
         jobs.append(job)
 
+print(f"{len(jobs)} queued")
+
 while len(jobs) > 0:
     time.sleep(5)
 
@@ -74,5 +76,5 @@ while len(jobs) > 0:
         )
         pane = window.attached_pane
         pane.send_keys("source venv/bin/activate")
-        pane.send_keys(f"python benchmark.py {job.benchmark_path} {job.experiment_type} --timeout {60 * 10} && echo DONE")
+        pane.send_keys(f"python benchmark.py {job.benchmark_path} {job.experiment_type} --timeout {60 * 60 * 4} && echo DONE")
 
