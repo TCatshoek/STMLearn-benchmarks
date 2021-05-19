@@ -134,4 +134,6 @@ dmypy.json
 /benchmarks
 
 /logs
+/logs_messedup
 *.png
+/rers/TrainingSeqReachRers2019/
