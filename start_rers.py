@@ -40,5 +40,5 @@ for benchmark_path in benchmarks:
         )
         pane = window.attached_pane
         pane.send_keys("source venv/bin/activate")
-        pane.send_keys(f"python rers.py {benchmark_path} {experiment_type} --timeout {60 * 10}")
+        pane.send_keys(f"python rers.py {benchmark_path} {experiment_type} --timeout {60 * 60 * 1}")
 
